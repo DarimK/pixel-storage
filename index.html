@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css">
+    <title>Pixel Storage</title>
+</head>
+
+<body>
+    <h1>Pixel Storage</h1>
+
+    <div class="container">
+        <p>
+            This is a simple web tool for embedding and extracting data within the pixels of an image. This is an
+            established practice known as <a href="https://google.com/search?q=steganography">Steganography</a>.
+        </p>
+        <p>
+            To embed data in an image, the least significant bits of each color channel (R, G, B) are replaced with bits
+            from the data. To extract data, these same bits are read from the image to reconstruct the original data.
+            The number of <strong>bits per color channel</strong> you choose affects the amount of data that can be
+            stored. A value of 1 provides low storage capacity but results in a nearly identical image, while a value of
+            8 provides high storage capacity but completely replaces the old image colors.
+        </p>
+        <label for="image">Container Image</label>
+        <input type="file" id="image" accept="image/*">
+    </div>
+
+    <div id="imageDisplay" class="display hidden">
+        <canvas id="canvas"></canvas>
+        <p id="storageInfo"></p>
+    </div>
+
+    <div id="form" class="container hidden">
+        <label for="bits">Bits per Color Channel</label>
+        <select id="bits">
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="4">4</option>
+            <option value="8">8</option>
+        </select>
+
+        <label for="file">Data File</label>
+        <input type="file" id="file">
+
+        <label for="text">Or Text</label>
+        <textarea id="text"></textarea>
+
+        <button id="embedButton">Embed</button>
+        <button id="extractButton">Extract</button>
+    </div>
+
+    <div id="result" class="display hidden">
+        <p id="resultInfo"></p>
+        <canvas id="resultCanvas"></canvas>
+        <textarea id="resultText" readonly></textarea>
+        <a id="resultLink"></a>
+    </div>
+
+    <script src="PixelStorage.js"></script>
+    <script src="script.js"></script>
+</body>
+
+</html>

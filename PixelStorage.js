@@ -3,7 +3,7 @@ const DELIMITER_BINARY = toBinary(DELIMITER);
 
 
 function toBinary(str) {
-    return str.split('').map(char => char.charCodeAt(0).toString(2).padStart(8, '0')).join('');
+    return str.split("").map(char => char.charCodeAt(0).toString(2).padStart(8, "0")).join("");
 }
 
 function embedHeader(image, bits, length, type) {
@@ -18,7 +18,7 @@ function embedHeader(image, bits, length, type) {
 }
 
 function embedData(image, data, bits, headerIdx) {
-    const binaryData = Array.from(data).map(byte => byte.toString(2).padStart(8, '0')).join('');
+    const binaryData = Array.from(data).map(byte => byte.toString(2).padStart(8, "0")).join("");
     const bitsSpace = -(2 ** bits);
 
     for (let i = headerIdx, dataIdx = 0; dataIdx < binaryData.length && i < image.length; i++) {
@@ -52,7 +52,7 @@ function toBytes(binaryData) {
 }
 
 function extractHeader(image) {
-    let binaryData = '';
+    let binaryData = "";
     let i = 0;
 
     for (; i < image.length; i++) {
@@ -67,10 +67,10 @@ function extractHeader(image) {
 
 function extractData(image, bits, length, headerIdx) {
     const bitsMask = (2 ** bits - 1);
-    let binaryData = '';
+    let binaryData = "";
 
     for (let i = headerIdx; i < image.length && binaryData.length < length; i++) {
-        if (i % 4 !== 3) binaryData += (image[i] & bitsMask).toString(2).padStart(bits, '0');
+        if (i % 4 !== 3) binaryData += (image[i] & bitsMask).toString(2).padStart(bits, "0");
     }
 
     return new Uint8Array(toBytes(binaryData));

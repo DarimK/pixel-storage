@@ -1,0 +1,111 @@
+@import url("https://fonts.googleapis.com/css2?family=Ubuntu:wght@400;700&display=swap");
+
+:root {
+    font-size: max(1vw, 16px);
+}
+
+* {
+    font-family: "Ubuntu", Consolas, monospace;
+}
+
+body {
+    background-color: #eee;
+    color: #222;
+}
+
+h1 {
+    text-align: center;
+}
+
+.container {
+    margin: 1rem 15vw;
+    padding: 1rem;
+    background-color: #fff;
+    border-radius: 0.5rem;
+    box-shadow: 0 0 10px 5px rgba(0, 0, 0, 0.1);
+}
+
+p {
+    line-height: 1.5;
+}
+
+a {
+    color: #37b;
+}
+
+input,
+select,
+textarea {
+    width: calc(100% - 12px);
+    margin-bottom: 1rem;
+    padding: 5px;
+    border: 1px solid #777;
+    border-radius: 5px;
+    font-size: 1rem;
+}
+
+select {
+    width: 100%;
+}
+
+textarea {
+    resize: vertical;
+}
+
+button {
+    width: 100%;
+    margin-bottom: 0.5rem;
+    padding: 10px;
+    border-width: 0;
+    border-radius: 5px;
+    background-color: #222;
+    font-size: 1rem;
+    color: #eee;
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: #333;
+}
+
+label {
+    margin-bottom: 0.5rem;
+}
+
+.container>* {
+    display: block;
+}
+
+.container>*:first-child {
+    margin-top: 0;
+}
+
+.container>*:last-child {
+    margin-bottom: 0;
+}
+
+.display {
+    display: block;
+    margin: 2rem 0;
+    text-align: center;
+    font-size: 2rem;
+}
+
+.display>p {
+    margin: 0;
+}
+
+.display>textarea {
+    width: 80%;
+    margin: 0;
+}
+
+canvas {
+    max-width: 80%;
+    border: 2px solid #777;
+    background-color: #fff;
+}
+
+.hidden {
+    display: none;
+}
