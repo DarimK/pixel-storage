@@ -100,7 +100,8 @@ label {
     width: 80%;
 }
 
-canvas {
+canvas,
+img {
     max-width: 80%;
     border: 2px solid #777;
     background-color: #fff;
