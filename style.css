@@ -91,13 +91,13 @@ label {
     font-size: 2rem;
 }
 
-.display>p {
-    margin: 0;
+.display>* {
+    display: block;
+    margin: 0 auto;
 }
 
 .display>textarea {
     width: 80%;
-    margin: 0;
 }
 
 canvas {

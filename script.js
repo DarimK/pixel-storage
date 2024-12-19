@@ -106,11 +106,14 @@ embedButton.addEventListener("click", (event) => {
     resultCanvas.height = imageData.height;
     const ctx = resultCanvas.getContext("2d");
     ctx.putImageData(imageData, 0, 0);
+    resultLink.href = resultCanvas.toDataURL("image/png");
+    resultLink.download = "image";
+    resultLink.textContent = "Download";
 
     visible(result, true);
     visible(resultCanvas, true);
     visible(resultText, false);
-    visible(resultLink, false);
+    visible(resultLink, true);
 
     setInfo("Data has been embedded into the image");
 });
@@ -123,10 +126,12 @@ extractButton.addEventListener("click", (event) => {
 
     if (type.startsWith("text") && data.length < 2 ** 12) {
         resultText.value = (new TextDecoder()).decode(data);
-        resultText.style.height = "auto";
-        resultText.style.height = resultText.scrollHeight + "px";
         visible(resultText, true);
         visible(resultLink, false);
+        setTimeout(() => {
+            resultText.style.height = "auto";
+            resultText.style.height = resultText.scrollHeight + "px";
+        }, 100);
     } else {
         const blob = new Blob([data], { type });
         const url = URL.createObjectURL(blob);
