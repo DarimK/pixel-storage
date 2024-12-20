@@ -20,9 +20,14 @@ function embedHeader(image, bits, length, type) {
 function embedData(image, data, bits, headerIdx) {
     const binaryData = Array.from(data).map(byte => byte.toString(2).padStart(8, "0")).join("");
     const bitsSpace = -(2 ** bits);
+    let dataIdx = 0;
 
-    for (let i = headerIdx, dataIdx = 0; dataIdx < binaryData.length && i < image.length; i++) {
+    for (let i = headerIdx; dataIdx < binaryData.length && i < image.length; i++) {
         if (i % 4 !== 3) image[i] = (image[i] & bitsSpace) | parseInt(binaryData.substring(dataIdx, dataIdx += bits), 2);
+    }
+
+    if (dataIdx < binaryData.length) {
+        throw new Error("Data is too large");
     }
 }
 
@@ -57,7 +62,7 @@ function extractHeader(image) {
 
     for (; i < image.length; i++) {
         if (i % 4 !== 3) binaryData += (image[i] & 1).toString();
-        if (binaryData.length % 8 === 0 && binaryData.endsWith(DELIMITER_BINARY)) break;
+        if (binaryData.length % 8 === 0 && binaryData.endsWith(DELIMITER_BINARY) || binaryData.length > 512) break;
     }
 
     const bytes = toBytes(binaryData.substring(0, binaryData.length - 8));
@@ -78,6 +83,11 @@ function extractData(image, bits, length, headerIdx) {
 
 function extract(image) {
     const [bits, length, type, headerIdx] = extractHeader(image);
-    const data = extractData(image, bits, length, headerIdx);
-    return { data, type };
+
+    if (bits && length && type) {
+        const data = extractData(image, bits, length, headerIdx);
+        return { data, type };
+    } else {
+        throw new Error("Cannot extract data from the image");
+    }
 }

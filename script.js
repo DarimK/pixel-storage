@@ -2,7 +2,7 @@ const image = document.getElementById("image");
 
 const imageDisplay = document.getElementById("imageDisplay");
 const canvas = document.getElementById("canvas");
-const ctx = canvas.getContext("2d");
+const ctx = canvas.getContext("2d", { willReadFrequently: true });
 const storageInfo = document.getElementById("storageInfo");
 
 const form = document.getElementById("form");
@@ -50,6 +50,7 @@ function setInfo(message) {
 
 image.addEventListener("change", (event) => {
     const file = event.target.files[0];
+    imageData = undefined;
     visible(imageDisplay, false);
     visible(form, false);
 
@@ -66,6 +67,7 @@ image.addEventListener("change", (event) => {
                 visible(imageDisplay, true);
                 visible(form, true);
                 displayStorage();
+                form.scrollIntoView();
             };
             img.src = event.target.result;
         };
@@ -75,7 +77,9 @@ image.addEventListener("change", (event) => {
 
 file.addEventListener("change", (event) => {
     const file = event.target.files[0];
-    fileType = event.target.files[0].type;
+    fileData = undefined;
+    fileType = file && file.type;
+
     if (file) {
         const reader = new FileReader();
         reader.onload = (event) => {
@@ -102,48 +106,65 @@ embedButton.addEventListener("click", (event) => {
     }
 
     const newImageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-    embed(newImageData.data, fileData || text.value, bits, fileType || "text/plain");
-    const tempCanvas = document.createElement("canvas");
-    const tempCtx = tempCanvas.getContext("2d");
-    tempCanvas.width = imageData.width;
-    tempCanvas.height = imageData.height;
-    tempCtx.putImageData(newImageData, 0, 0);
-    resultLink.href = resultImage.src = tempCanvas.toDataURL("image/png");
-    resultLink.download = "image";
-    resultLink.textContent = "Download";
+
+    try {
+        embed(newImageData.data, fileData || text.value, bits, fileType || "text/plain");
+        const tempCanvas = document.createElement("canvas");
+        const tempCtx = tempCanvas.getContext("2d");
+        tempCanvas.width = imageData.width;
+        tempCanvas.height = imageData.height;
+        tempCtx.putImageData(newImageData, 0, 0);
+        resultLink.href = resultImage.src = tempCanvas.toDataURL("image/png");
+        resultLink.download = "image";
+        resultLink.textContent = "Download";
+        visible(resultImage, true);
+        visible(resultLink, true);
+        setInfo("Data has been embedded into the image");
+    } catch (e) {
+        visible(resultImage, false);
+        visible(resultLink, false);
+        setInfo(e.message);
+    }
 
     visible(result, true);
-    visible(resultImage, true);
     visible(resultText, false);
-    visible(resultLink, true);
-    setInfo("Data has been embedded into the image");
+    result.scrollIntoView();
 });
 
 extractButton.addEventListener("click", (event) => {
     event.preventDefault();
-    const { data, type } = extract(imageData.data);
-    visible(result, true);
-    visible(resultImage, false);
 
-    if (type.startsWith("text") && data.length < 2 ** 12) {
-        resultText.value = (new TextDecoder()).decode(data);
-        visible(resultText, true);
-        visible(resultLink, false);
-        setTimeout(() => {
-            resultText.style.height = "auto";
-            resultText.style.height = resultText.scrollHeight + "px";
-        }, 100);
-    } else {
-        const blob = new Blob([data], { type });
-        url = URL.createObjectURL(blob);
-        resultLink.href = url;
-        resultLink.download = "data";
-        resultLink.textContent = "Download";
+    try {
+        const { data, type } = extract(imageData.data);
+
+        if (type.startsWith("text") && data.length < 2 ** 12) {
+            resultText.value = (new TextDecoder()).decode(data);
+            visible(resultText, true);
+            visible(resultLink, false);
+            setTimeout(() => {
+                resultText.style.height = "auto";
+                resultText.style.height = resultText.scrollHeight + "px";
+            }, 100);
+        } else {
+            const blob = new Blob([data], { type });
+            url = URL.createObjectURL(blob);
+            resultLink.href = url;
+            resultLink.download = "data";
+            resultLink.textContent = "Download";
+            visible(resultText, false);
+            visible(resultLink, true);
+        }
+
+        setInfo("Data has been extracted from the image");
+    } catch (e) {
         visible(resultText, false);
-        visible(resultLink, true);
+        visible(resultLink, false);
+        setInfo(e.message);
     }
 
-    setInfo("Data has been extracted from the image");
+    visible(result, true);
+    visible(resultImage, false);
+    result.scrollIntoView();
 });
 
 resultLink.addEventListener("click", () => {
