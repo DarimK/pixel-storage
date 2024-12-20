@@ -31,7 +31,11 @@ function visible(element, visibility) {
 
 function displayStorage() {
     if (imageData) {
-        storageInfo.textContent = `Potential Storage: ${imageData.width * imageData.height * 3 * bits / 8} bytes`;
+        let pixelCount = 0;
+        for (let i = 3; i < imageData.data.length; i += 4) {
+            if (imageData.data[i] === 255) pixelCount++;
+        }
+        storageInfo.textContent = `Potential Storage: ${Math.floor(pixelCount * 3 * bits / 8)} bytes`;
     } else {
         storageInfo.textContent = "";
     }

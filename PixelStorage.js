@@ -11,7 +11,7 @@ function embedHeader(image, bits, length, type) {
     let i = 0;
 
     for (let dataIdx = 0; dataIdx < binaryData.length && i < image.length; i++) {
-        if (i % 4 !== 3) image[i] = (image[i] & ~1) | parseInt(binaryData[dataIdx++], 2);
+        if (i % 4 !== 3 && image[(i & -4) + 3] === 255) image[i] = (image[i] & ~1) | parseInt(binaryData[dataIdx++], 2);
     }
 
     return i;
@@ -23,7 +23,7 @@ function embedData(image, data, bits, headerIdx) {
     let dataIdx = 0;
 
     for (let i = headerIdx; dataIdx < binaryData.length && i < image.length; i++) {
-        if (i % 4 !== 3) image[i] = (image[i] & bitsSpace) | parseInt(binaryData.substring(dataIdx, dataIdx += bits), 2);
+        if (i % 4 !== 3 && image[(i & -4) + 3] === 255) image[i] = (image[i] & bitsSpace) | parseInt(binaryData.substring(dataIdx, dataIdx += bits), 2);
     }
 
     if (dataIdx < binaryData.length) {
@@ -39,10 +39,6 @@ function embed(image, data, bits, type) {
 
     const headerIdx = embedHeader(image, bits, data.length * 8, type);
     embedData(image, data, bits, headerIdx);
-
-    for (let i = 0; i < image.length; i += 4) {
-        if (image[i + 3] === 0) image[i + 3] = 255;
-    }
 
     return image;
 }
@@ -61,7 +57,7 @@ function extractHeader(image) {
     let i = 0;
 
     for (; i < image.length; i++) {
-        if (i % 4 !== 3) binaryData += (image[i] & 1).toString();
+        if (i % 4 !== 3 && image[(i & -4) + 3] === 255) binaryData += (image[i] & 1).toString();
         if (binaryData.length % 8 === 0 && binaryData.endsWith(DELIMITER_BINARY) || binaryData.length > 512) break;
     }
 
@@ -75,7 +71,7 @@ function extractData(image, bits, length, headerIdx) {
     let binaryData = "";
 
     for (let i = headerIdx; i < image.length && binaryData.length < length; i++) {
-        if (i % 4 !== 3) binaryData += (image[i] & bitsMask).toString(2).padStart(bits, "0");
+        if (i % 4 !== 3 && image[(i & -4) + 3] === 255) binaryData += (image[i] & bitsMask).toString(2).padStart(bits, "0");
     }
 
     return new Uint8Array(toBytes(binaryData));
