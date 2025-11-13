@@ -18,7 +18,7 @@ function embedHeader(image, bits, length, type) {
 }
 
 function embedData(image, data, bits, headerIdx) {
-    const binaryData = Array.from(data).map(byte => byte.toString(2).padStart(8, "0")).join("");
+    const binaryData = Array.from(data).map(byte => byte.toString(2).padStart(8, "0")).join("").padEnd(Math.ceil(data.length * 8 / bits) * bits, "0");
     const bitsSpace = -(2 ** bits);
     let dataIdx = 0;
 
