@@ -67,14 +67,35 @@ function extractHeader(image) {
 }
 
 function extractData(image, bits, length, headerIdx) {
-    const bitsMask = (2 ** bits - 1);
-    let binaryData = "";
+    const data = [];
+    let bitBuffer = 0;
+    let bitCount = 0;
+    let extractedBits = 0;
 
-    for (let i = headerIdx; i < image.length && binaryData.length < length; i++) {
-        if (i % 4 !== 3 && image[(i & -4) + 3] === 255) binaryData += (image[i] & bitsMask).toString(2).padStart(bits, "0");
+    for (let i = headerIdx; i < image.length && extractedBits < length; i++) {
+        if (i % 4 === 3 || image[(i & -4) + 3] !== 255) continue;
+        const value = image[i];
+        const lsb = value & ((1 << bits) - 1);
+
+        for (let b = bits - 1; b >= 0 && extractedBits < length; b--) {
+            const bit = (lsb >> b) & 1;
+            bitBuffer = (bitBuffer << 1) | bit;
+            bitCount++;
+            extractedBits++;
+
+            if (bitCount === 8) {
+                data.push(bitBuffer);
+                bitBuffer = 0;
+                bitCount = 0;
+            }
+        }
     }
 
-    return new Uint8Array(toBytes(binaryData));
+    if (bitCount > 0) {
+        data.push(bitBuffer);
+    }
+
+    return new Uint8Array(data);
 }
 
 function extract(image) {
