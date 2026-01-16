@@ -21,14 +21,23 @@ function embedData(image, data, bits, headerIdx) {
     const binaryData = Array.from(data).map(byte => byte.toString(2).padStart(8, "0")).join("").padEnd(Math.ceil(data.length * 8 / bits) * bits, "0");
     const bitsSpace = -(2 ** bits);
     let dataIdx = 0;
+    let i = headerIdx;
 
-    for (let i = headerIdx; dataIdx < binaryData.length && i < image.length; i++) {
+    for (; dataIdx < binaryData.length && i < image.length; i++) {
         if (i % 4 !== 3 && image[(i & -4) + 3] === 255) image[i] = (image[i] & bitsSpace) | parseInt(binaryData.substring(dataIdx, dataIdx += bits), 2);
+    }
+
+    const storageUsed = i / image.length;
+
+    for (; i < image.length; i++) {
+        if (i % 4 !== 3 && image[(i & -4) + 3] === 255) image[i] = (image[i] & bitsSpace) | Math.floor(Math.random() * -bitsSpace);
     }
 
     if (dataIdx < binaryData.length) {
         throw new Error("Data is too large");
     }
+
+    return storageUsed;
 }
 
 function embed(image, data, bits, type) {
@@ -38,9 +47,7 @@ function embed(image, data, bits, type) {
     }
 
     const headerIdx = embedHeader(image, bits, data.length * 8, type);
-    embedData(image, data, bits, headerIdx);
-
-    return image;
+    return embedData(image, data, bits, headerIdx);
 }
 
 

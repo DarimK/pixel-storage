@@ -51,12 +51,21 @@ function setInfo(message) {
     }
 }
 
+function clearResult() {
+    setTimeout(() => {
+        URL.revokeObjectURL(url);
+        resultLink.href = resultImage.src = "";
+    }, 100);
+    visible(result, false);
+}
+
 
 image.addEventListener("change", (event) => {
     const file = event.target.files[0];
     imageData = undefined;
     visible(imageDisplay, false);
     visible(form, false);
+    clearResult();
 
     if (file) {
         const reader = new FileReader();
@@ -83,6 +92,7 @@ file.addEventListener("change", (event) => {
     const file = event.target.files[0];
     fileData = undefined;
     fileType = file && file.type;
+    clearResult();
 
     if (file) {
         const reader = new FileReader();
@@ -100,11 +110,12 @@ bitsSelect.addEventListener("change", () => {
 
 embedButton.addEventListener("click", (event) => {
     event.preventDefault();
+    visible(resultImage, false);
+    visible(resultText, false);
+    visible(resultLink, false);
+
     if (!fileData && !text.value) {
         visible(result, true);
-        visible(resultImage, false);
-        visible(resultText, false);
-        visible(resultLink, false);
         setInfo("Please upload a data file or enter some text");
         return;
     }
@@ -112,7 +123,7 @@ embedButton.addEventListener("click", (event) => {
     const newImageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
 
     try {
-        embed(newImageData.data, fileData || text.value, bits, fileType || "text/plain");
+        const storageUsed = embed(newImageData.data, fileData || text.value, bits, fileType || "text/plain");
         const tempCanvas = document.createElement("canvas");
         const tempCtx = tempCanvas.getContext("2d");
         tempCanvas.width = imageData.width;
@@ -123,20 +134,20 @@ embedButton.addEventListener("click", (event) => {
         resultLink.textContent = "Download";
         visible(resultImage, true);
         visible(resultLink, true);
-        setInfo("Data has been embedded into the image");
+        setInfo(`Data has been embedded (${(storageUsed * 100).toFixed(2)}% used)`);
     } catch (e) {
-        visible(resultImage, false);
-        visible(resultLink, false);
         setInfo(e.message);
     }
 
     visible(result, true);
-    visible(resultText, false);
     result.scrollIntoView();
 });
 
 extractButton.addEventListener("click", (event) => {
     event.preventDefault();
+    visible(resultImage, false);
+    visible(resultText, false);
+    visible(resultLink, false);
 
     try {
         const { data, type } = extract(imageData.data);
@@ -144,7 +155,6 @@ extractButton.addEventListener("click", (event) => {
         if (type.startsWith("text") && data.length < 2 ** 12) {
             resultText.value = (new TextDecoder()).decode(data);
             visible(resultText, true);
-            visible(resultLink, false);
             setTimeout(() => {
                 resultText.style.height = "auto";
                 resultText.style.height = resultText.scrollHeight + "px";
@@ -152,28 +162,27 @@ extractButton.addEventListener("click", (event) => {
         } else {
             const blob = new Blob([data], { type });
             url = URL.createObjectURL(blob);
+
+            if (type.startsWith("image")) {
+                resultImage.src = url;
+                visible(resultImage, true);
+            }
+
             resultLink.href = url;
             resultLink.download = "data";
             resultLink.textContent = "Download";
-            visible(resultText, false);
             visible(resultLink, true);
         }
 
-        setInfo("Data has been extracted from the image");
+        setInfo(`Data has been extracted (${type})`);
     } catch (e) {
-        visible(resultText, false);
-        visible(resultLink, false);
         setInfo(e.message);
     }
 
     visible(result, true);
-    visible(resultImage, false);
     result.scrollIntoView();
 });
 
 resultLink.addEventListener("click", () => {
-    setTimeout(() => {
-        URL.revokeObjectURL(url);
-    }, 100);
-    visible(result, false);
+    clearResult();
 });
